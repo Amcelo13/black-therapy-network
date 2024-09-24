@@ -57,55 +57,58 @@ jobs:
           EC2_SSH_PRIVATE_KEY: $EC2_SSH_PRIVATE_KEY
           EC2_URL: $EC2_URL
 
-      # Step 8: Deploy to EC2
       - name: Deploy to EC2
         run: |
-          ssh -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_URL << 'EOF'
-            if ! command -v docker &> /dev/null
-            then
-              sudo apt-get update
-              sudo apt-get install -y docker.io
-            fi
-
-            docker pull ${{ secrets.DOCKER_USERNAME }}/backend:latest
-
-            docker stop backend || true 
-            docker rm backend || true
-
-            docker run -d -p 8000:8000 --name backend \
-              -e MONGO_URL=${{ secrets.MONGO_URL }} \
-              -e PORT=${{ secrets.PORT }} \
-              -e NEXT_PUBLIC_APP_URL=${{ secrets.NEXT_PUBLIC_APP_URL }} \
-              -e RESEND_API_KEY=${{ secrets.RESEND_API_KEY }} \
-              -e COMPANY_RESEND_GMAIL_ACCOUNT=${{ secrets.COMPANY_RESEND_GMAIL_ACCOUNT }} \
-              chetelise91/backend:latest
- 
-
-            if ! command -v nginx &> /dev/null
-            then
-              sudo apt-get update
-              sudo apt-get install -y nginx
-            fi
-
-            # Create Nginx configuration
-            sudo tee /etc/nginx/sites-available/default > /dev/null << 'EOL'
-            server {
-                listen 80;
-                server_name 13.200.123.34;
-
-                location / {
-                    proxy_pass http://localhost:8000;
-                    proxy_http_version 1.1;
-                    proxy_set_header Upgrade $http_upgrade;
-                    proxy_set_header Connection 'upgrade';
-                    proxy_set_header Host $host;
-                    proxy_cache_bypass $http_upgrade;
-                }
-            }
-            EOL
-
-           
-            sudo systemctl restart nginx
-
-            docker image prune -f
-          EOF
+            ssh -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_URL << 'EOF'
+              if ! command -v docker &> /dev/null
+              then
+                sudo apt-get update
+                sudo apt-get install -y docker.io
+              fi
+        
+              docker pull ${{ secrets.DOCKER_USERNAME }}/backend:latest
+        
+              docker stop backend || true 
+              docker rm backend || true
+        
+              docker run -d -p 8000:8000 --name backend \
+                -e MONGO_URL=${{ secrets.MONGO_URL }} \
+                -e PORT=${{ secrets.PORT }} \
+                -e NEXT_PUBLIC_APP_URL=${{ secrets.NEXT_PUBLIC_APP_URL }} \
+                -e RESEND_API_KEY=${{ secrets.RESEND_API_KEY }} \
+                -e COMPANY_RESEND_GMAIL_ACCOUNT=${{ secrets.COMPANY_RESEND_GMAIL_ACCOUNT }} \
+                chetelise91/backend:latest
+        
+              if ! command -v nginx &> /dev/null
+              then
+                sudo apt-get update
+                sudo apt-get install -y nginx
+              fi
+        
+              # Create temporary Nginx configuration
+              sudo tee /etc/nginx/sites-available/default.tmp > /dev/null << 'EOL'
+              server {
+                  listen 80;
+                  server_name 13.200.123.34;
+        
+                  location / {
+                      proxy_pass http://localhost:8000;
+                      proxy_http_version 1.1;
+                      proxy_set_header Upgrade $http_upgrade;
+                      proxy_set_header Connection 'upgrade';
+                      proxy_set_header Host $host;
+                      proxy_cache_bypass $http_upgrade;
+                  }
+              }
+              EOL
+        
+              # Move temporary config to default location if successful
+              if [ $? -eq 0 ]; then
+                sudo mv /etc/nginx/sites-available/default.tmp /etc/nginx/sites-available/default
+                sudo systemctl restart nginx
+              else
+                echo "Failed to create Nginx config"
+              fi
+        
+              docker image prune -f
+            EOF
