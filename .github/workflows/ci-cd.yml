@@ -122,7 +122,8 @@ jobs:
                 echo "Cleaning up temporary files and logs..."
                 sudo rm -rf /tmp/*
                 sudo truncate -s 0 /var/log/*.log
-
+                echo "Cleaning up log files..."
+                sudo find /var/log/ -type f -name "*.log" -exec truncate -s 0 
                 echo "Checking disk usage after cleanup..."
                 df -h
 
