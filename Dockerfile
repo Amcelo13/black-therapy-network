@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 
 # Install pm2 globally
-RUN npm install pm2 -g
+RUN npm install -g ts-node pm2
 
 # Expose the application port
 EXPOSE 8000
