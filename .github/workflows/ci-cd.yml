@@ -97,9 +97,8 @@ jobs:
             }
             EOL
 
-            # Exit the Nginx config file and then restart Nginx
+           
             sudo systemctl restart nginx
 
-            # Clean up old Docker images
             docker image prune -f
           EOF
