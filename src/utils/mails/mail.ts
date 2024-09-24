@@ -13,7 +13,7 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
     await resend.emails.send({
         from: process.env.COMPANY_RESEND_GMAIL_ACCOUNT as string,
         to: email,
-        subject: "Reset your password",
+        subject: "Reset your password", 
         react: ForgotPasswordEmail({ url: resetLink }),
     })
 }
