@@ -57,7 +57,7 @@ connectDB();
 socketHandler(io);
 
 app.get("/", (req: any, res: any) => {
-    res.send("Hello world entry point");
+    res.send("Hello world entry point⛳");
 });
 
 app.use("/api/admin", checkValidAdminRole, admin);

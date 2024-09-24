@@ -3,7 +3,7 @@ import ForgotPasswordEmail from "./templates/forgot-password-reset";
 import { configDotenv } from "dotenv";
 import PaymentRequestRejected from "./templates/payment-request-rejected";
 configDotenv()
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY)  
 
 
 export const sendPasswordResetEmail = async (email: string, token: string) => {
