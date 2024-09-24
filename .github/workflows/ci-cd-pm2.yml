@@ -48,7 +48,7 @@ jobs:
           echo "Creating app directory on EC2 instance..."
           ssh -o StrictHostKeyChecking=no -o ConnectTimeout=20 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_URL }} "mkdir -p ~/app"
           echo "Copying files to EC2 instance..."
-          scp -o StrictHostKeyChecking=no -r ./* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_URL }}:~/app
+          scp -v -o StrictHostKeyChecking=no -r ./* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_URL }}:~/app
           echo "Running deployment script on EC2 instance..."
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_URL }} << EOF
             # Update system and install Node.js if not present
