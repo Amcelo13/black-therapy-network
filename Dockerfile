@@ -1,21 +1,22 @@
-# Base image
-FROM node:18
+# Step 1: Use a Node.js base image
+FROM node:18-alpine
 
-# Set the working directory
+# Step 2: Set working directory inside the container
 WORKDIR /app
 
-# Copy package.json and install dependencies
+# Step 3: Copy package.json and install dependencies
 COPY package*.json ./
+
 RUN npm install
 
-# Copy the rest of the application
+# Step 4: Install ts-node globally
+RUN npm install -g ts-node typescript
+
+# Step 5: Copy the rest of the app source code to the container
 COPY . .
 
-# Install pm2 globally
-RUN npm install -g ts-node pm2
-
-# Expose the application port
+# Step 6: Expose the application port
 EXPOSE 8000
 
-# Start the application with pm2 using ts-node
-CMD ["pm2-runtime", "start", "src/app.ts", "--interpreter", "ts-node"]
+# Step 7: Run the app using ts-node (point to the .ts entry file)
+CMD ["ts-node", "src/app.ts"]
