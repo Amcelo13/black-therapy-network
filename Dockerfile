@@ -19,4 +19,4 @@ COPY . .
 EXPOSE 8000
 
 # Step 7: Run the app using ts-node (point to the .ts entry file)
-CMD ["ts-node", "src/app.ts"]
+CMD ["npm", "start"]
