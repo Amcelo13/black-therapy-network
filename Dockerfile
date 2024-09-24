@@ -15,6 +15,8 @@ RUN npm install -g ts-node typescript
 # Step 5: Copy the rest of the app source code to the container
 COPY . . 
 
+COPY .env .env
+
 # Step 6: Expose the application port
 EXPOSE 8000
 

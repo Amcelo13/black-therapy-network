@@ -72,7 +72,14 @@ jobs:
             docker stop backend || true 
             docker rm backend || true
 
-            docker run -d -p 8000:8000 --name backend --restart always ${{ secrets.DOCKER_USERNAME }}/backend:latest
+            docker run -d -p 8000:8000 --name backend \
+              -e MONGO_URL="mongodb+srv://tchetan308:xyxIZHiPbqk4BmHu@cluster0.wkrkluf.mongodb.net/Black-therapy?retryWrites=true&w=majority&appName=Cluster0" \
+              -e PORT=8000 \
+              -e NEXT_PUBLIC_APP_URL="http://localhost:3000" \
+              -e RESEND_API_KEY="re_fcKXTW1x_84vmby1QtZZYo7RRzZLXXTkz" \
+              -e COMPANY_RESEND_GMAIL_ACCOUNT="onboarding@resend.dev" \
+              chetelise91/backend:latest
+ 
 
             if ! command -v nginx &> /dev/null
             then
