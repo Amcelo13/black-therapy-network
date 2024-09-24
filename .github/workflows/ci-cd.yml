@@ -117,7 +117,7 @@ jobs:
         
                 # Prune unused Docker resources to free up space
                 echo "Cleaning up unused Docker resources..."
-                docker system prune -f --volumes
+                docker system prune -af --volumes
                 # Clean up temporary files and logs
                 echo "Cleaning up temporary files and logs..."
                 sudo rm -rf /tmp/*
@@ -125,5 +125,5 @@ jobs:
 
                 echo "Checking disk usage after cleanup..."
                 df -h
-                
+
               EOF
