@@ -87,15 +87,16 @@ jobs:
               export NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
               export RESEND_API_KEY=$RESEND_API_KEY
               export COMPANY_RESEND_GMAIL_ACCOUNT=$COMPANY_RESEND_GMAIL_ACCOUNT
-
+              
+              echo pwd
               # Start the application with PM2
-              /usr/local/bin/pm2 start ~/app/src/app.ts --name "app" --interpreter "tsx" --env production
+              pm2 start ~/app/src/app.ts --name "app" --interpreter "tsx" --env production
 
               # Verify the process is running
-              /usr/local/bin/pm2 list
+              pm2 list
 
               # Save PM2 process list and set to start on boot
-              /usr/local/bin/pm2 save
+              pm2 save
               sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u $USER --hp /home/$USER
 
               # Install Nginx if not present
