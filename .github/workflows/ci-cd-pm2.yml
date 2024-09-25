@@ -89,7 +89,7 @@ jobs:
               export COMPANY_RESEND_GMAIL_ACCOUNT=$COMPANY_RESEND_GMAIL_ACCOUNT
 
               # Start the application with PM2
-              /usr/local/bin/pm2 start src/app.ts --name "app" --interpreter "tsx" --env production
+              /usr/local/bin/pm2 start ~/app/src/app.ts --name "app" --interpreter "tsx" --env production
 
               # Verify the process is running
               /usr/local/bin/pm2 list
