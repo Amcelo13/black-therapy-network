@@ -37,7 +37,6 @@ jobs:
           ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
       # Step 6: Deploy to EC2
-              # Step 6: Deploy to EC2
       - name: Deploy to EC2
         env:
             MONGO_URL: ${{ secrets.MONGO_URL }}
@@ -81,6 +80,13 @@ jobs:
                 RESEND_API_KEY=$RESEND_API_KEY
                 COMPANY_RESEND_GMAIL_ACCOUNT=$COMPANY_RESEND_GMAIL_ACCOUNT
                 EOT
+
+                # Export environment variables
+                export MONGO_URL=$MONGO_URL
+                export PORT=$PORT
+                export NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+                export RESEND_API_KEY=$RESEND_API_KEY
+                export COMPANY_RESEND_GMAIL_ACCOUNT=$COMPANY_RESEND_GMAIL_ACCOUNT
 
                 # Start or restart the application with PM2
                 pm2 start ecosystem.config.cjs --env production || pm2 restart ecosystem.config.cjs --env production
