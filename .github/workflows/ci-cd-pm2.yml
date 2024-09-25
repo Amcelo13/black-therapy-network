@@ -82,7 +82,7 @@ jobs:
             EOT
 
             # Start or restart the application with PM2
-            pm2 startOrRestart ecosystem.config.cjs --env production
+            pm2 startOrRestart ecosystem.config.cjs
 
             # Save PM2 process list and set to start on boot
             pm2 save
