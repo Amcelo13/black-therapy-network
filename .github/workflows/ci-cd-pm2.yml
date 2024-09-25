@@ -89,14 +89,13 @@ jobs:
               export COMPANY_RESEND_GMAIL_ACCOUNT=$COMPANY_RESEND_GMAIL_ACCOUNT
 
               # Start the application with PM2
-              pm2 stop app
-              pm2 start src/app.ts --name "app" --interpreter "tsx" --env production
+              sudo pm2 start src/app.ts --name "app" --interpreter "tsx" --env production
 
               # Verify the process is running
-              pm2 list
+              sudo pm2 list
 
               # Save PM2 process list and set to start on boot
-              pm2 save
+              sudo pm2 save
               sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u $USER --hp /home/$USER
 
               # Install Nginx if not present
