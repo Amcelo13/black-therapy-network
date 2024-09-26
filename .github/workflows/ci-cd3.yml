@@ -112,4 +112,3 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_URL }} \
           "/usr/local/bin/pm2 list"
-4
