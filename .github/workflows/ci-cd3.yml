@@ -6,6 +6,11 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      EC2_SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+      EC2_URL: ${{ secrets.EC2_URL }}
+      EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+
     steps:
       # Step 1: Checkout code
       - name: Checkout code
@@ -31,14 +36,29 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
-      # Step 6: Deploy to EC2 using PM2
+      # Step 6: Copy project to EC2 and run deployment script
+      - name: Deploy to EC2
+        env:
+          MONGO_URL: ${{ secrets.MONGO_URL }}
+          PORT: ${{ secrets.PORT }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          COMPANY_RESEND_GMAIL_ACCOUNT: ${{ secrets.COMPANY_RESEND_GMAIL_ACCOUNT }}
+        run: |
+          echo "Creating app directory on EC2 instance..."
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=20 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_URL }} "mkdir -p ~/app"
+          echo "Copying files to EC2 instance..."
+          rsync -avz --progress ./* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_URL }}:~/app
+
+      # Step 7: Use PM2 deployment action
       - name: Deploy app with PM2
         uses: victorargento/pm2-deployment@main
         with:
           remote-path: "/home/${{ secrets.EC2_USERNAME }}/app"
           host: ${{ secrets.EC2_URL }}
           username: ${{ secrets.EC2_USERNAME }}
-          port: 22  # Standard SSH port, change if necessary
+          port: 22
+          # password: ${{ secrets.prod-password }}  # Make sure this is set in your secrets
           pm2-id: "app"  # Name of your PM2 app
           build: true
 
@@ -92,3 +112,4 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_URL }} \
           "/usr/local/bin/pm2 list"
+4
