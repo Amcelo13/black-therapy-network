@@ -1,4 +1,4 @@
-name: CI/CD Pipeline with PM2 3 package
+name: CI/CD Pipeline with PM2 --> 
 
 on:
   workflow_dispatch:
@@ -36,7 +36,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
-      # Step 6: Copy project to EC2 and run deployment script
+      # Step 6: Deploy to EC2
       - name: Deploy to EC2
         env:
           MONGO_URL: ${{ secrets.MONGO_URL }}
@@ -49,25 +49,54 @@ jobs:
           ssh -o StrictHostKeyChecking=no -o ConnectTimeout=20 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_URL }} "mkdir -p ~/app"
           echo "Copying files to EC2 instance..."
           rsync -avz --progress ./* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_URL }}:~/app
-
-      # Step 7: Use PM2 deployment action
-      - name: Deploy app with PM2
-        uses: victorargento/pm2-deployment@main
-        with:
-          remote-path: "/home/${{ secrets.EC2_USERNAME }}/app"
-          host: ${{ secrets.EC2_URL }}
-          username: ${{ secrets.EC2_USERNAME }}
-          port: 22
-          # password: ${{ secrets.prod-password }}  # Make sure this is set in your secrets
-          pm2-id: "app"  # Name of your PM2 app
-          build: true
-
-      # Step 8: Finalize PM2 and Nginx setup
-      - name: Finalize deployment
-        run: |
+          echo "Running deployment script on EC2 instance..."
           ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_URL }} << EOF
+              # Update system and install Node.js if not present
+              sudo apt-get update
+              if ! command -v node &> /dev/null; then
+              curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+              sudo apt-get install -y nodejs
+              fi
+
+              # Install PM2 globally if not present
+              if ! command -v pm2 &> /dev/null; then
+              sudo npm install -g pm2
+              fi
+
+              # Navigate to app directory
+              cd ~/app
+
+              # Install dependencies
+              npm install
+
+              # Build the project (if applicable)
+              npm run build
+
+              # Set environment variables
+              cat <<EOT > .env
+              MONGO_URL=$MONGO_URL
+              PORT=$PORT
+              NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+              RESEND_API_KEY=$RESEND_API_KEY
+              COMPANY_RESEND_GMAIL_ACCOUNT=$COMPANY_RESEND_GMAIL_ACCOUNT
+              EOT
+
+              # Export environment variables
+              export MONGO_URL=$MONGO_URL
+              export PORT=$PORT
+              export NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+              export RESEND_API_KEY=$RESEND_API_KEY
+              export COMPANY_RESEND_GMAIL_ACCOUNT=$COMPANY_RESEND_GMAIL_ACCOUNT
+              
+              echo pwd
+              # Start the application with PM2
+              sudo pm2 start app
+
+              # Verify the process is running
+              sudo pm2 list
+
               # Save PM2 process list and set to start on boot
-              /usr/local/bin/pm2 save
+              sudo pm2 save
               sudo env PATH=$PATH:/usr/bin pm2 startup systemd -u $USER --hp /home/$USER
 
               # Install Nginx if not present
@@ -105,10 +134,5 @@ jobs:
 
               echo "Checking disk usage after cleanup..."
               df -h
-          EOF
 
-      # Step 9: Verify PM2 processes
-      - name: Verify PM2 process
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_URL }} \
-          "/usr/local/bin/pm2 list"
+          EOF
